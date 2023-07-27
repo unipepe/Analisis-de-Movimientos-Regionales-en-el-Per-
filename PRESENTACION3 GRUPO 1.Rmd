@@ -1,0 +1,722 @@
+
+---
+title: "Análisis de los Movimientos Regionales en el Perú"
+author: "Bruno Univazo, Luis Rojas, Stefany Contreras"
+date: "2023-07-09"
+output: html_document
+---
+##### Los movimientos regionales son organizaciones políticas que buscan representar los intereses de una región específica y que participan en las elecciones municipales, provinciales y regionales en el Perú. Estos movimientos han cobrado relevancia en los últimos años, al ganar la mayoría de los gobiernos regionales en las elecciones subnacionales. Sin embargo, poco se sabe sobre los factores que influyen en el éxito electoral de los movimientos regionales y cómo estos se relacionan con el sistema político nacional. En este trabajo, se analiza una base de datos de 187 movimientos regionales inscritos ante el Jurado Nacional de Elecciones (JNE) y se estudia la relación entre el número de autoridades electas históricamente por cada movimiento y otras variables como los años de existencia, los procesos electorales enfrentados y las autoridades vigentes del periodo 2023-2026. Se emplean técnicas descriptivas e inferenciales como gráficos, tablas, pruebas t y correlaciones para explorar y contrastar hipótesis sobre el desempeño electoral de los movimientos regionales en el Perú.
+
+## **PRESENTACIÓN 1**
+```{r}
+library(rio)
+data = import("ESTADÍSTICA PRESENTACIÓN EXCEL.xlsx")
+```
+```{r}
+data <- subset (data, select = -`MOVIMIENTO REGIONAL`)
+```
+```{r}
+names(data)
+```
+```{r}
+str(data)
+```
+```{r}
+data$Macroregión=as.factor(data$Macroregión)
+```
+
+```{r}
+class(data$Macroregión)
+```
+
+##### Se debe solicitar el formato para trabajar la variable.
+##### Aquí se verifica que tipo de variable es en este caso una nominal.
+```{r}
+table(data$Macroregión)
+```
+
+```{r}
+library(dplyr)
+data %>%                     
+count(Macroregión=Macroregión, name = "Frecuencia") %>%  mutate(Porcentaje=Frecuencia/sum(Frecuencia)*100)
+```
+
+##### Se debe contabilizar cuantos movimientos regionales y  existen en cada macroregión con el obtener un mejor manejo de datos y que al momento de crear algún movimiento regional tomen sus respectivas estrategias. Además, los porcentajes nos serán de ayuda ante cualquier que se quiera realizar en el futuro.
+```{r}
+library(modeest)
+mlv(data$Macroregión)
+```
+
+##### La macrozona centro es la que posee una mayor cantidad de movimientos regionales inscritos, esto significa que la rivalidad política en esta macrozona se hace más intensa al momento de reclutar personas o hacer campañas durante las elecciones electorales.
+```{r}
+library(ggplot2)
+ggplot(data = data, aes(y=Macroregión)) + geom_bar() + labs(x = "Frecuencia", y = "Macroregión") + geom_bar(fill = 'red')
+```
+
+##### Como se puede apreciar en la gráfico de barras, la macrozona oriente es la que posee una menor cantidad de movimientos regionales, cabe resaltar que habiendo menos competencia política, los resultados para determinar al ganador se darían en menos tiempo.
+
+### N° COMITÉS
+```{r}
+data$COMITÉS=as.numeric(data$COMITÉS)
+```
+```{r}
+class(data$COMITÉS)
+```
+ 
+```{r}
+library(dplyr)
+data %>% count(COMITÉS=COMITÉS, name = "Frecuencia") %>% mutate(Porcentaje=Frecuencia/sum(Frecuencia)*100)  
+```
+
+##### Estos datos nos ayudará a asociar cuántos movimientos regionales cuentan con una determinada cantidad de cómites. Además, esto nos permitirá evaluar cuántos movimientos regionales se encuentran preparados para la formación de militantes y enfrentar frente a otros movimientos en las elecciones a discutir en un futuro.
+
+```{r}
+library(modeest)
+mfv(data$COMITÉS)
+```
+
+##### Aquí se consulta la moda, la cual es 0, por lo cual se puede intuir que existen movimientos regionales en pleno desarrollo o simplemente que aún no poseen el suficiente interés o presupuesto económico para crear cómites y formar personas para postularse en las elecciones electorales. 
+```{r}
+summary(data$COMITÉS)
+```
+
+##### De acuerdo con la mediana obtenida el 50% de los movimientos regionales estudiados poseen de 0 a 5 comités, esto significa que ciertos movimientos regionales no están enfocados en la creación de comités. Esto es algo alarmante ya que la formación de buenos postulantes ya sea a diferente cargo público es de suma importancia para que pueda realizar un buen mandato y sea del agrado de la población.  
+##### Lo mismo sucede con el promedio, el cual es sumamente bajo (5.3) y no garantiza la cantidad de candidatos que puedan postularse por parte de los movimientos regionales.
+##### Sin embargo; existe un movimiento el cual tiene 20 cómites, este movimiento posiblemente bastantes adeptos ya que los comités se encuentran dispersados en distintos puntos de la región.
+##### Como se sabía anteriormente, la menor cantidad de cómites que poseen los movimientos regionales es de cero unidades.
+
+
+```{r}
+data %>%                      
+  group_by(Macroregión) %>%    
+  summarize(Promedio=mean(COMITÉS),Mediana=median(COMITÉS)) 
+```
+
+##### También se halló el promedio de comités de cada macroregión, con el fin de evaluar la competencia política en cada macroregión. En la macroregión centro deberían existir más comités ya que es la macrozona más cercana a la capital y debe haber más población. En comparación a los demás macrozonas, el promedio de la macrozona oriente no es lo suficientemente alto como para competir (3.0625). La mediana de cada macroregión es casi igual al promedio de cada una de estas, lo cual indica que no existe un desbalance pronunciado.
+
+```{r}
+ggplot(data, aes(x=COMITÉS)) + geom_histogram()+
+  labs(x = "N° de comités", y = "N° de movimientos que poseen esa cantidad de comités")
+```
+
+##### Todo lo expresado referente a los movimientos regionales y número de comités se ve reflejado en este histograma, el cual determina un sesgo hacia la izquierda y establece que existe una mayor cantidad de movimientos regionales que poseen menos de 10 comités que los movimientos regionales que poseen más de 10 comités. En particular, aquí se puede apreciar como los movimientos regionales no se dan abasto para crear cómites y formar personas capacitadas para el ámbito político.
+
+```{r}
+sd(data$COMITÉS)
+```
+##### De acuerdo al resultado, se puede predecir que existe una alta dispersión de datos, lo cual indica que existen movimientos que poseen desde 0 comités hasta el máximo que es de 20 comités.
+```{r}
+var(data$COMITÉS)
+```
+
+```{r}
+range(data$COMITÉS)
+```
+##### El rango es de 0 a 20, así que el valor es 20. La diferencia entre el máximo valor y el mínimo valor no es tan notable, lo que implica una homogeneidad en el número de cómites que poseen los movimientos regionales.
+```{r}
+quantile(data$COMITÉS)
+```
+##### Los cuartiles muestran que el 50% de los datos está entre 2.5 y 8, y que el 25% superior tiene valores no muy altos, lo que demuestra una asimetría a la izquierda de la distribución.
+```{r}
+IQR(data$COMITÉS)
+```
+```{r}
+ggplot(data, aes(y = COMITÉS )) + geom_boxplot()
+```
+
+##### Del siguiente gráfico se puede interpretar que la mediana es 5 y la dispersión se encuentra entre 2.5 y 8 aproximadamente, teniendo como outliers a dos valores. Esto podría reflejar la desigualdad que existe entre unos y otros movimientos regionales respecto a la creación de comités,lo que ayuda a un movimiento para que tenga un surgimiento en la competencia política.
+```{r}
+library(ggplot2)
+ggplot(data, aes(x=Macroregión,y = COMITÉS,fill=Macroregión)) + 
+  geom_boxplot()
+```
+
+##### El siguiente gráfico puesto trata de explicar el número de comités que existen en cada macroregión, se puede apreciar que la macrozona norte posee una mayor dispersión respecto a las demás y esta misma macrozona posee una mayor cantidad de puntos extremos refiriéndose a los comités.
+```{r}
+boxplot(data$COMITÉS)
+outliers <- boxplot(data$COMITÉS)$out
+outliers
+```
+
+##### Los datos únicos extremos que salen del sistema de dispersión es tener 18 y 20 comités.
+```{r}
+library(dplyr) 
+library(ggplot2) 
+ggplot(data, aes(x = COMITÉS, fill = Macroregión , colour = Macroregión)) + geom_histogram(alpha = 0.5 , position = "dodge") + facet_wrap(~ Macroregión) 
+ggsave("histogram.png", width = 10, height = 10) 
+```
+
+##### En este gráfico se hace un recuento de los movimientos regionales que poseen cierta cantidad de comités y son reflejados por colores. 
+```{r}
+ggplot(data, aes(x=Macroregión,y = COMITÉS,fill=COMITÉS)) + geom_boxplot() + coord_flip() 
+ggsave("boxplot.png", width = 10, height = 6) 
+```
+
+##### Se puede apreciar que los movimientos regionales que poseen cierta cantidad de cómites por macroregión son plasmados en estos gráficos. Se puede observar en todas las macrozonas existen diferentes valores; sin embargo, se puede visualizar que la macrozona oriente se encuentra incluida en macrozona norte ya que esta posee una mayor dispersión en sus datos. 
+
+### AÑOS DE EXISTENCIA
+
+```{r}
+data$ANOS_EXISTENCIA=as.numeric(data$ANOS_EXISTENCIA)
+```
+```{r}
+class(data$ANOS_EXISTENCIA)
+```
+##### Primero se debe saber con qué tipo de variable se está trabajando, en este caso numérica.
+
+```{r}
+library(dplyr)
+data %>% count(ANOS_EXISTENCIA=ANOS_EXISTENCIA, name = "Frecuencia") %>% mutate(Porcentaje=Frecuencia/sum(Frecuencia)*100) 
+```
+
+##### Gracias a estos datos se puede evaluar que existen movimientos regionales que poseen una distinta cantidad de años existencia, lo cual es bueno ya que tener movimientos veteranos pueden brindar experiencia a la contienda electoral e inclusive son estos los que optan por postularse a los gobiernos regionales. En cambio, los más nuevos optan por desarrollarse o postular directamente a alcaldías distritales con el fin de ganar experiencia.
+
+```{r}
+library(modeest)
+mfv(data$ANOS_EXISTENCIA)
+```
+##### Se determina que la mayoría de movimientos regionales poseen una antigüedad de 5 años, lo cual es un tiempo prudente para que un movimiento regional pueda desarrollarse e incursionar en la política.
+```{r}
+summary(data$ANOS_EXISTENCIA)
+```
+##### Se puede apreciar que el 50% de los datos se encuentran desde 0 años de existencia hasta los 9 años, esto en general no es malo ya que se requieren nuevos movimientos que puedan hacer competencia a los ya establecidos; más bien, se debería incurrir en la creación de estos movimientos si un movimiento tiene casi 9 años de existencia; este ya se consideraría como un ente establecido. 
+
+##### El promedio de años de los años de existencia es de 9.08, esto evidencia que existen una mayor cantidad de movimientos veteranos por el valor reflejado en la media.
+
+##### El valor máximo es de 18 años de existencia, lo cual refleja qué tan estable ha sido ese movimiento y qué tanto se encuentra involucrado en la política regional actual.
+
+##### El valor mínimo es de 1 año de existencia, lo cual refleja que ningún partido tiene ningún año de existencia; es decir que es urgente la creación de nuevos movimientos para que el poder regional no sean disputados por los mismo movimientos y darle un aire fresco a la política regional.  
+
+```{r}
+data %>%                      
+  group_by(Macroregión) %>%    
+  summarize(Promedio=mean(ANOS_EXISTENCIA),Mediana=median(ANOS_EXISTENCIA))
+```
+
+##### Se puede apreciar que en cada macrozona el promedio de años de existencia del partido es similar a la mediana. Lo cual indica que no existe un desbalance entre las cantidades halladas.
+
+```{r}
+ggplot(data, aes(x=ANOS_EXISTENCIA)) + geom_histogram()+ labs(x = "Años de existencia del partido", y = "Frecuencia")
+```
+
+##### De este histograma puede interpretarse que existe una mayor cantidad de movimientos regionales que poseen entre 5 y 10 años de existencia que de los que poseen entre 10 y 15 años de existencia.
+
+```{r}
+sd(data$ANOS_EXISTENCIA)
+```
+##### Existe una alta variabilidad en la variable años de existencia debido a que la desviacion estándar es mayor a 1.
+
+```{r}
+var(data$ANOS_EXISTENCIA)
+```
+
+```{r}
+range(data$ANOS_EXISTENCIA)
+```
+```{r}
+quantile(data$ANOS_EXISTENCIA)
+```
+
+```{r}
+IQR(data$ANOS_EXISTENCIA)
+```
+##### La cantidad de años que se encuentran entre el 25 y 75 por ciento de la variable, resultó siendo de 8 años, con esta cantidad de años un movimiento regional puede adquirir la suficiente capacidad para enfrentar desafíos políticos más grandes.
+```{r}
+ggplot(data, aes(y = ANOS_EXISTENCIA)) + 
+  stat_boxplot(geom = "errorbar", 
+               width = 0.25) +    
+  geom_boxplot()
+```
+
+##### En este boxplot se muestra que el 50% de movimientos regionales se encuentran en que poseen entre 5 y 13 años de vigencia aproximadamente; por esa razón hay que destacar que si un movimiento regional posee más de 13 años de existencia puede considerarse entre el 25% de los movimientos regionales más antiguos, cargando en sí un prestigio reconocible. 
+```{r}
+ggplot(data, aes(x=Macroregión,y = ANOS_EXISTENCIA,fill=Macroregión)) + 
+  geom_boxplot() +
+  coord_flip()
+ggsave("boxplot2.png", width = 10, height = 6)
+```
+
+##### De estos boxplots por macroregión, se determina que los datos centrales de la macrozona oriente posee una mayor dispersión respecto a los demás. 
+
+```{r}
+outliers <- boxplot(data$ANOS_EXISTENCIA)
+```
+
+##### Este diagrama de cajas no muestra la existencia de valores extremos, dado que la mayoría de datos se encuentran concentrados entre 1 y 18 años de vigencia.
+
+```{r}
+ggplot(data, aes(x = ANOS_EXISTENCIA, fill = Macroregión , colour = Macroregión)) + 
+  geom_histogram(alpha = 0.5 , position = "dodge") + 
+  facet_wrap(~ Macroregión) 
+ggsave("histogram2.png", width = 10, height = 10)
+```
+
+##### Finalmente de estos histogramas se puede concluir que en la macrozona centro existen más movimientos regionales con más de 10 años de vigencia. Esto, demuestra la estabilidad que existe en esta zona y que la creación de de nuevos movimientos podrían ser vitales para brindar una nueva perspectiva a esta macrozona.  
+
+### **AFILIACIONES**
+
+```{r}
+summary(data$AFILIACIONES)
+```
+##### Según el resumen estadístico, la media del número de afiliaciones de los movimientos regionaleses 904.2, la mediana es 447 y la moda es 0. Esto indica que hay una gran variación en el número de afiliados de cada movimiento, y que hay muchos movimientos con cero afiliados.
+```{r}
+library(DescTools)
+Mode(data$AFILIACIONES)
+
+```
+##### El valor más repetido de número de afiliaciones es 0 con 34 repeticiones. 
+```{r}
+range(data$AFILIACIONES)
+```
+# hay una gran diferencia entre el mínimo y el máximo, lo que implica una alta heterogeneidad en el número de afiliaciones.
+```{r}
+sd(data$AFILIACIONES)
+```
+##### la desviación estándar es mayor que la media, lo que sugiere una alta variabilidad.
+```{r}
+quantile(data$AFILIACIONES, c(0.25, 0.5, 0.75))
+```
+##### Los cuartiles muestran que el 50% de los datos está entre 154.5 y 758, y que el 25% superior tiene valores muy altos, lo que demuestra una asimetría a la derecha de la distribución.
+```{r}
+library(dplyr)
+library(ggplot2)
+ggplot(data, aes(x = AFILIACIONES)) + 
+  geom_histogram(color = "red") +
+  labs(x = "Afiliaciones", y = "Frecuencia", title = "Número de afiliaciones de los movimientos regionales")
+```
+
+##### El gráfico representa el número de afiliaciones de los movimientos regionales en el Perú. El histograma muestra que la distribución es asimétrica a la derecha, con algunos valores extremos muy altos. Esto podría reflejar la desigualdad en el poder y la influencia de los movimientos regionales, así como la falta de participación política de la población. 
+### **AUTORIDADES VIGENTES**
+
+```{r}
+library(DescTools)
+```
+```{r}
+Mode(data$AUTORIDADES_VIGENTES)
+```
+##### Se puede observar que la mayoría de movimientos regionales sí tienen autoridades en vigencia, siendo 104 pertenecientes a este grupo.
+```{r}
+table(data$AUTORIDADES_VIGENTES)
+```
+```{r}
+prop.table(table(data$AUTORIDADES_VIGENTES))
+```
+```{r}
+library(dplyr)
+library(ggplot2)
+
+ggplot(data, aes(x = AUTORIDADES_VIGENTES)) + 
+  geom_bar() + 
+  labs(x = "Autoridades en vigencia", y = "Frecuencia") 
+```
+
+#####  El gráfico representa los movimientos regionales agrupados en si tienen autoridades en vigencia o no. Según la tabla de frecuencias, el 55.6% de los movimientos regionales tiene autoridades en vigencia, mientras que el 44.4% no las tiene. Esto significa que hay una ligera mayoría de movimientos que han logrado mantener su presencia política en sus respectivas regiones, mientras que una proporción significativa ha perdido su representación o ha sido disuelta. 
+
+### **AUTORIDADES ELECTAS**
+```{r}
+mean(data$AUTORIDADES_ELECTAS)
+sd(data$AUTORIDADES_ELECTAS)
+range(data$AUTORIDADES_ELECTAS)
+quantile(data$AUTORIDADES_ELECTAS)
+```
+```{r}
+ggplot(data, aes(x = AUTORIDADES_ELECTAS)) +
+  geom_histogram() + 
+  labs(x = "N° de autoridades electas históricamente", y = "Frecuencia") 
+
+
+ggplot(data, aes(x = "", y = AUTORIDADES_ELECTAS)) + 
+  geom_boxplot() + 
+  labs(x = "", y = "N° de autoridades electas históricamente")
+```
+
+##### El gráfico representa el número de autoridades electas históricamente por los movimientos regionales. Según el resumen estadístico, la media es 130.2888, la mediana es 61 y la moda es 0. Esto indica que hay una gran variación en el número de autoridades electas de cada movimiento, y que en muchos movimientos no se ha logrado elegir ninguna autoridad. El histograma y el diagrama de caja muestran que la distribución es asimétrica a la derecha, con algunos valores extremos muy altos. Esto podría reflejar la desigualdad en el éxito electoral y la trayectoria histórica de los movimientos regionales, así como la competencia en la política. 
+
+### **PROCESOS ENFRENTADOS**
+
+```{r}
+summary(data$PROCESOS_ENFRENTADOS)
+```
+
+```{r}
+table(data$PROCESOS_ENFRENTADOS)
+```
+
+##### La media es 3,198; la mediana es 2 y la moda es 1. Esto quiere decir que el número promedio de procesos electorales enfrentados por los movientos regionales es 3. El valor intermedio de los procesos electorales es 2, es decir la mitad del número de los procesos electorales es mayor a 2 y la otra mitad es menor a 2. 1 es el número de procesos que se da con mayor frecuencia en los movimientos regionales. 
+
+```{r}
+sd(data$PROCESOS_ENFRENTADOS)
+var(data$PROCESOS_ENFRENTADOS)
+```
+
+##### Los valores se está alejando 2.88 en promedio con respecto a la media. La desviación estándar sugiere una baja variabilidad con respecto a la media. 
+
+```{r}
+range(data$PROCESOS_ENFRENTADOS)
+```
+
+##### El rango es 13, siendo la diferencia entre 13-0 (máximo-mínimo)
+
+```{r}
+quantile(data$PROCESOS_ENFRENTADOS)
+```
+
+##### El 25% de los procesos electorales enfrentados es menor o igual a 1 y el 75% mayor o igual a 1. 
+
+```{r}
+library(ggplot2)
+ggplot(data, aes(x=PROCESOS_ENFRENTADOS)) + geom_histogram() + xlab("procesos electorales")+ ylab("frecuencia") + labs(title = 'Número de procesos electorales enfrentados')
+```
+
+
+```{r}
+library(ggplot2)
+ggplot(data, aes(y=PROCESOS_ENFRENTADOS)) + 
+  geom_boxplot(fill='purple') + ylab("Procesos electorales") + labs(title = 'Número de procesos electorales enfrentados')
+
+```
+
+##### El histograma es asimétrico, se muestra que hay un sesgo a la derecha, además, el número de procesos electorales enfrentados por cada movimiento regional no es más que 13. Asimismo, el número de procesos electorales con mayor frecuencia es el 1, es así que 45 movimientos electorales del total solo participaron 1 vez en un proceso electoral. 
+##### En el boxplot la mediana es 2, la cual está más cerca del Q1 que del Q3, lo cual nos indica que el sesgo es positivo, hay un valor extremo.  
+
+### **ALIANZAS ELECTORALES**
+
+```{r}
+table(data$ALIANZAS_ELECTORALES)
+```
+```{r}
+prop.table(table(data$ALIANZAS_ELECTORALES))
+```
+##### La moda es NO. Siendo el 88% de movimientos que NO y el 11% que SI. Esdecir, los movimientos regionales mayormente NO poseen alianzas electorales. 
+```{r}
+ggplot(data = data, aes(x = ALIANZAS_ELECTORALES)) +
+  geom_bar(fill = 'red')  + ggtitle("¿Posee alianzas electorales?") +
+  xlab("Alianzas electorales") + ylab("Frecuencia")
+
+```
+
+##### La moda es NO, los movimientos regionales mayormente NO poseen alianzas electorales. Siendo 165 (88.2%) movimientos regionales que no poseen alianzas y 22(11.8%) sí.
+
+### **AUTORIDADES VACADAS**
+
+```{r}
+summary(data$AUTORIDADES_VACADAS)
+```
+```{r}
+table(data$AUTORIDADES_VACADAS)
+```
+
+##### La media es 0; la mediana es 1.299 y la moda es 0. Esto quiere decir que el número promedio de autoridades vacadas en los movientos regionales es 0. El valor intermedio de los procesos electorales es 1,299; es decir la mitad del número de los procesos electorales es mayor a 1,299 y la otra mitad es menor a 1,299.
+0 es el número de autoridades vacadas que se da con mayor frecuencia en los movimientos regionales. 
+```{r}
+sd(data$AUTORIDADES_VACADAS)
+var(data$AUTORIDADES_VACADAS)
+
+```
+
+##### Los valores se está alejando 2.266 en promedio con respecto a la media. 
+##### La desviación estándar sugiere una baja variabilidad con respecto a la media
+```{r}
+range(data$AUTORIDADES_VACADAS)
+```
+
+##### El rango es 15, siendo la diferencia entre 15-0 (máximo-mínimo)
+```{r}
+quantile(data$AUTORIDADES_VACADAS)
+```
+
+##### El 75% de los procesos electorales enfrentados es menor o igual a 2 y el 25% mayor o igual a 2. 
+```{r}
+ggplot(data, aes(x=AUTORIDADES_VACADAS)) + geom_histogram() + xlab("Autoridades vacadas")+ ylab("Frequencia") + labs(title = 'Número de Autoridades vacadas')
+```
+```{r}
+library(ggplot2)
+ggplot(data, aes(y=AUTORIDADES_VACADAS)) + 
+  geom_boxplot(fill='purple') + ylab("Autoridades vacadas") + labs(title = 'Número de autoridades vacadas')
+
+```
+
+##### El histograma es asimétrico, se muestra que hay un sesgo a la derecha, además, el número de autoridades vacadas en cada movimiento regional no es más que 15. Asimismo, el número de procesos electorales con mayor frecuencia es el 0,  es así que 110 movimientos electorales del total participaron 0 veces en un proceso electoral. 
+##### En el boxplot la mediana es 0, la cual está más cerca del Q1 que del Q3, lo cual nos indica que el sesgo es positivo, hay valores extremos. 
+
+### CONCLUSIÓN PRESENTACIÓN 1: De la investigación realizada se puede concluir que existe una alta diversidad y desigualdad entre los movimientos políticos regionales en el Perú, en cuanto a su número de comités, afiliaciones, autoridades, procesos electorales, alianzas y años de existencia. Nuestra variable dependiente a investigar será autoridades electas para determinar cuán exitoso es un movimiento regional explicado según los diversos factores anteriormente mencionados, que serán nuestras variables independientes. También, los años de existencia de los movimientos políticos regionales reflejan la estabilidad y la permanencia de estos en el panorama político del Perú. Podemos notar movimientos regionales con diversa cantidad de años en existencia, lo cual permite distinguir a los nuevos y los veteranos. Según nuestra perspectiva, desde los años 90 los partidos políticos padecen una crisis que hasta fueron superados en algunas regiones por los movimientos regionales al momento de realizarse elecciones regionales como en el caso de los años 2002, 2006 y 2010. 
+
+## **PRESENTACIÓN 2**
+
+```{r}
+names(data)
+```
+##### *1. ¿Existe una relación entre el número de procesos enfrentados(incluye todos los procesos desde que el movimiento regional existe) y el número de autoridades electas históricamente (representantes electos desde su creación hasta la actualidad)?*
+
+
+```{r}
+str(data$PROCESOS_ENFRENTADOS)
+```
+```{r}
+str(data$AUTORIDADES_ELECTAS)
+```
+```{r}
+summary(data$PROCESOS_ENFRENTADOS)
+```
+```{r}
+summary(data$AUTORIDADES_ELECTAS)
+```
+
+```{r}
+library(ggplot2)
+ggplot(data, aes(x=PROCESOS_ENFRENTADOS, y=AUTORIDADES_ELECTAS)) +
+  geom_point(colour="red") +  xlab("N° de procesos electorales enfrentados") +  ylab ("N° de autoridades electas históricamente") +
+  ggtitle("Relación entre el número de procesos electorales enfrentados y el número de autoridades electas históricamente") +
+  theme_light() +
+geom_smooth(method="lm", se=FALSE)
+
+```
+
+##### En el gráfico se puede evidenciar que existen valores atípicos; además de que los movimientos regionales que tuvieron mayor numero de procesos electorales enfrentados a lo largo de su historia en las elecciones municipales, provinciales y regionales también tuvieron un número mayor de autoridades electas históricamente, trayendo como resultado que su correlacion sea directa y fuerte.
+
+```{r}
+cor.test(data$PROCESOS_ENFRENTADOS,data$AUTORIDADES_ELECTAS)
+```
+
+##### Dado que el p-valor es menor a 0.05, rechazamos la hipótesis nula, a un 95% de nivel de confianza. Por lo tanto, aceptamos la hipótesis alternativa y concluimos que “Sí existe correlación entre el número de procesos electorales enfrentados y el número de autoridades electas históricamente. El coeficiente es 0.76, lo que quiere decir, por un lado, que el sentido de la correlación es positiva o también llamada relación directa (+) y por otro lado, que la intensidad de esta correlación es grande o también llamada fuerte.En conclusión a mayor número de procesos electorales enfrentados mayor también será el número de autoridades electas históricamente. 
+
+
+```{r}
+str(data)
+class(data)
+```
+
+##### Analizaremos las variables "Autoridades vigentes" y "N° de Autoridades electas". El periodo de las autoridades vigentes estudiadas es del 2023 al 2026.
+```{r}
+t.test(AUTORIDADES_ELECTAS ~ AUTORIDADES_VIGENTES, data = data,
+       alternative = "two.sided", var.equal = TRUE)
+```
+
+##### Se realizó una prueba t de dos muestras para comparar la media de autoridades electas entre los grupos de autoridades vigentes, que son “SI” y “NO”.
+
+##### El valor del estadístico t fue -3.8732, lo que indica que la media de autoridades electas fue menor en el grupo “NO” que en el grupo “SI”.
+
+##### El valor p fue 0.0001489, lo que significa que la diferencia entre las medias fue estadísticamente significativa al nivel de confianza del 95%.
+
+##### La estimación de la media de autoridades electas en el grupo “NO” fue 78.0241 y en el grupo “SI” fue 172.0000.
+
+##### En conclusión, se puede afirmar que hay una diferencia significativa en la media de autoridades electas entre los grupos de autoridades vigentes, siendo mayor en el grupo “SI” que en el grupo “NO”.
+
+```{r}
+library(ggplot2)
+boxplot(AUTORIDADES_ELECTAS ~ AUTORIDADES_VIGENTES, data = data,
+        xlab = "Autoridades vigentes",
+        ylab = "N° de autoridades electas",
+        main = "Distribución de N° de autoridades electas por Autoridades vigentes")
+```
+
+##### El boxplot compara la distribución del número de autoridades electas entre los grupos “SI” y “NO” de autoridades vigentes.
+
+##### En el grupo "NO" su distribución es asimétrica positiva, sesgada a la derecha, y del grupo "SI" es asímetrica positiva, sesgada a la derecha.
+
+##### El grupo “SI” tiene una mediana y un rango intercuartílico mayores que el grupo “NO”, lo que significa que tiene una media y una variabilidad más altas.
+
+##### El grupo “NO” tiene más valores atípicos que el grupo “SI”, lo que significa que tiene algunos casos muy diferentes de la media.
+
+##### La diferencia entre las medias de los dos grupos es estadísticamente significativa, según el intervalo de confianza.
+```{r}
+library(ggplot2)
+library(dplyr)
+
+data_summary <- data %>%
+  group_by(AUTORIDADES_VIGENTES) %>%
+  summarise(mean = mean(AUTORIDADES_ELECTAS), se = sd(AUTORIDADES_ELECTAS) / sqrt(n()))
+
+# Graficar un diagrama de barras con barras de error
+ggplot(data_summary, aes(x = AUTORIDADES_VIGENTES, y = mean, fill = AUTORIDADES_VIGENTES)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  geom_errorbar(aes(ymin = mean - se, ymax = mean + se), width = 0.2) +
+  xlab("Autoridades vigentes") +
+  ylab("N° de autoridades electas") +
+  ggtitle("Diagrama de barras con barras de error de N° de autoridades electas por Autoridades vigentes") +
+  theme_light()
+
+```
+
+##### El gráfico muestra la media y el error estándar del número de autoridades electas por los grupos de autoridades vigentes, que son "SI" y "NO". Se puede observar que el grupo "SI" tiene una media y un error estándar mayores que el grupo "NO", lo que significa que tiene un número promedio y una variabilidad más altos de autoridades electas. Esto concuerda con el resultado de la prueba t que se realizó, que mostró que hay una diferencia significativa en la media de autoridades electas entre los grupos de autoridades vigentes, siendo mayor en el grupo "SI" que en el grupo "NO".
+##### También se puede notar que las barras de error no se solapan entre los dos grupos, lo que indica que hay una diferencia estadísticamente significativa entre las medias. 
+
+### *Correlación entre N° DE AUTORIDADES ELECTAS (representantes electos desde su creación hasta la actualidad ) Y AÑOS DE EXISTENCIA (actualidad-año de creación):*
+
+```{r}
+str(data$AUTORIDADES_ELECTAS)
+```
+
+```{r}
+str(data$ANOS_EXISTENCIA)
+```
+
+```{r}
+summary(data$AUTORIDADES_ELECTAS)
+```
+
+```{r}
+summary(data$ANOS_EXISTENCIA)
+```
+
+```{r}
+library(ggplot2)
+ggplot(data, aes(x=AUTORIDADES_ELECTAS, y=ANOS_EXISTENCIA)) +
+  geom_point(colour="red") +  xlab("N° De autoridades electas") +  ylab ("Años de existencia del movimiento regional") +
+  ggtitle("Relación entre el N° de autoridades electas y los años de existencia del movimiento regional") +
+  theme_light() +
+   geom_smooth(method="lm", se=FALSE) 
+
+```
+
+##### Se puede deducir que existe una relación directa positiva moderada y una buena cantidad de valores atípicos. Por lo tanto si un movimiento regional tiene muchos años de existencia; es decir que sus probabilidades de haberse consolidado y optado por postularse a algún municipio o ente regional, e inclusive haber ganado elecciones a lo largo de su historia han sido moderadamente altas.
+
+```{r}
+cor.test(data$AUTORIDADES_ELECTAS,data$ANOS_EXISTENCIA)
+```
+
+##### Dado que el p-valor es menor a 0.05, rechazamos la hipótesis nula, a un 95% de nivel de confianza. Además, aceptamos la hipótesis alternativa y concluimos que “Sí existe correlación entre el número de autoridades electas con el que los movimientos regionales cuentan y los años de exitencia del movimiento regional". El coeficiente es 0.542, lo que quiere decir, por un lado, que el sentido de la correlación es positiva o también llamada relación directa (+) y por otro lado, que la intensidad de esta correlación es moderada o mediana.En conclusión, a mayor años de existencia del movimiento regional mayor también será el número de autoridades electas con los que registra históricamente el movimiento regional.
+
+### **CONCLUSIÓN PRESENTACIÓN 2**
+##### Nuestra variable de interés o también denominada variable dependiente "Número de autoridades electas". Asimismo, se puede decir que en promedio el número de autoridades electas será mayor en el grupo de movimientos regionales que sí tiene autoridades vigentes. También, mayor será el número de autoridades electas si un movimiento regional tiene mayor número de años de existencia. Es decir mientras un movimiento regional sea más antiguo, más será el número de autoridades electas que podrá obtener a lo largo de los procesos electorales hasta que el movimiento regional en algún momento se elimine o no sea vigente.
+
+##### En resumen, la variable de autoridades electas representa el éxito político de los movimientos regionales en el Perú, que son organizaciones políticas que buscan representar los intereses de una región específica y que participan en las elecciones municipales, provinciales y regionales. La relación entre autoridades electas y otras variables, como años de existencia, procesos electorales enfrentados y autoridades vigentes, muestra que hay factores que influyen en el desempeño electoral de los movimientos regionales, como la experiencia, la trayectoria, la continuidad y la competencia política.
+
+## **PRESENTACIÓN 3**
+
+```{r}
+modelo1 = lm(data$AUTORIDADES_ELECTAS ~ data$PROCESOS_ENFRENTADOS)
+summary(modelo1)
+```
+#### *1. ¿Nuestro modelo funciona?* 
+
+##### Al tener un p valor menor a 0.05, tenemos pruebas suficientes para rechazar la hipótesis nula y afirmar que el modelo es significativo. Esto quiere decir que el númnero de procesos enfrentados tiene un impacto estadísticamente significativo en el número de autoridades electas de un movimiento regional.
+
+#### *2.	¿Qué tanto explica nuestro modelo?* 
+
+##### El modelo explica el 57.94% de la variabilidad del número de autoridades electas. Esto significa que las variable independiente incluidas en el modelo (número de procesos electorales) puede explicar alrededor del 57.94% de las diferencias observadas en el número de autoridades electas de un movimiento regional.
+
+#### *3. ¿Cuál es el efecto de x en y?*
+
+##### En este caso, al ser este valor 45.077, concluímos que cada vez que el valor de los procesos electorales
+aumenta en 1, el número de autoridades electas de un movimiento regional aumenta en 45.077.
+
+#### *4. Ecuación de la recta*
+
+##### Ŷ=-13.862+45.077 (x)
+##### Vamos a predecir con un ejemplo
+##### Por ejemplo, si un movimiento regional ha participado históricamente en 7 procesos electorales, ¿cuántas autoridades electas tendrá?
+```{r}
+X=7
+Y=-13.862+(45.077*X)
+Y
+```
+##### Podemos predecir en base a nuestro modelo, que tendrá 301 autoridades electas en promedio.  
+
+#### Gráfico
+
+```{r}
+library(ggplot2)
+ggplot(data, aes(y=AUTORIDADES_ELECTAS, x=PROCESOS_ENFRENTADOS)) + ylab("N° de autoridades electas") + xlab("N° de procesos electorales enfrentados") + geom_point() + geom_smooth(method="lm", se = T)
+
+```
+
+##### En este gráfico de dispersión se evidencia una correlación positiva fuerte, esto nos indica que a mayor número de procesos electorales mayor será el número de autoridades electas en un movimiento regional 
+
+
+### REGRESIÓN LINEAL MÚLTIPLE
+
+```{r}
+modelo2=lm(data$AUTORIDADES_ELECTAS~data$PROCESOS_ENFRENTADOS+data$AUTORIDADES_VIGENTES+data$AUTORIDADES_VACADAS+data$AFILIACIONES)
+summary(modelo2)
+data$AUTORIDADES_VIGENTES=factor(ifelse(data$AUTORIDADES_VIGENTES=="SI",1,0))
+```
+#### *1.	¿Nuestro modelo funciona?* 
+
+##### Al tener un p valor menor a 0.05, tenemos pruebas suficientes para rechazar la hipótesis nula y afirmar que el modelo es significativo. Esto quiere decir que las variables independientes tienen un impacto estadísticamente significativo en el número de autoridades electas de un movimiento regional.
+
+#### *2.	¿Qué tanto explica nuestro modelo?* 
+
+##### El modelo explica el 63.11% de la variabilidad del número de autoridades electas. Esto significa que las variables independientes incluidas en el modelo (como el número de procesos electorales enfrentados, el número de autoridades vigentes, el número de autpridades vacadas, el número de afiliaciones) pueden explicar alrededor del 63.11% de las diferencias observadas en el número de autoridades electas.
+
+#### *3.	¿Las variables explicativas aportan al modelo?*
+
+##### Todas las varibales explicativas aportan al modelo porque de todas su p valor es menor a 0.05.Esto quiere decir que el todas las variables explicativas como el número de procesos electorales enfrentados, el número de autoridades vigentes, el número de autpridades vacadas, el número de afiliaciones) tiene un impacto estadísticamente significativo en el número de autoridades electas de un movimiento regional.
+
+
+#### *4.¿Cómo es la relación entre las variables?*
+
+##### ¿Cómo es la relación entre las variables?
+En la variable de procesos enfrentados el valor es  31.849627, concluímos que cada vez que el valor de los procesos electorales aumenta en 1, el número de autoridades electas de un movimiento regional aumenta en  31.849627.
+
+##### Cuando un movimiento regional sí tiene autoridades vigentes(en comparación de los que no tienen autoridades vigentes), las autoridades electas van a aumentar en 56.191391.
+
+##### En la variable de autoridades vacadas el valor es  13.633475  , concluímos que cada vez que el valor de las autoridades vacadas aumenta en 1, el número de autoridades electas de un movimiento regional aumenta en  13.633475.
+
+##### En la variable de afiliaciones el valor es  0.018716 , concluímos que cada vez que el valor de los afiliaciones aumenta en 1, el número de autoridades electas de un movimiento regional aumenta en  0.018716 .
+
+#### *5.¿Qué variable aporta más al modelo?*
+
+##### La variable que aporta más al modelo de la regresión lineal múltiple es el número de procesos electorales enfrentados, con un coeficiente estandarizado de 0.5378104, el cual en comparación con las otras variables independientes tiene el mayor coeficiente lo que indica que aporta más al modelo. Esto significa que el número de procesos electorales enfrentados es la variable que tiene mayor influencia en el número de autoridades electas de un movimiento regional.
+
+
+
+```{r}
+library(lm.beta)
+lm.beta(modelo2)
+
+```
+###### La variable explicativa que aporta más al modelo es el número de procesos enfrentados históricamente, con un coeficiente estandarizado de 0.5378104, el cual en comparación con las otras variables independientes tiene el mayor coeficiente lo que indica que aporta más al modelo.  
+
+
+#### *6. Construir la ecuación y predecir* 
+```{r}
+modelo2$coefficients
+```
+
+##### Ŷ=-37.45184995+31.84962711(procesos)+56.19139143(autoridades_vigentessi)+13.63347498(autorid_vacadas)+0.01871558(afiliaciones).
+##### Vamos a predecir con un ejemplo:
+##### Por ejemplo, si un movimiento regional ha participado históricamente en 9 procesos electorales, cuántas autoridades electas tendrá?
+
+```{r}
+procesos=9
+autorid_vig=0
+autorid_vacadas=1
+afiliaciones=301
+
+
+Y2=-37.45184995+(31.8496271*procesos)+(56.1913914*autorid_vig)+(13.6334749*autorid_vacadas)+(+0.0187155*afiliaciones)
+Y2
+
+```
+##### Cuando las independientes toman los valores determinados anteriormente, el modelo predice que "Y" toma el valor de 268.4616, esto quiere decir que el número de autoridades electas toma el valor predicho de 268.4616.
+
+##### Creamos las tablas de regresión
+```{r}
+library(jtools)
+summ(modelo1)
+```
+##### El modelo de regresión lineal simple muestra que el número de autoridades electas de un movimiento regional depende positivamente y significativamente del número de procesos electorales enfrentados. El modelo explica el 58% de la variabilidad del número de autoridades electas. El coeficiente de la variable independiente indica que por cada proceso electoral enfrentado, el número de autoridades electas aumenta en 45.077 unidades en promedio.
+
+```{r}
+summ(modelo2)
+```
+
+##### El modelo de regresión lineal múltiple muestra que el número de autoridades electas de un movimiento regional depende positiva y significativamente de cuatro variables: el número de procesos electorales enfrentados, el número de autoridades vigentes, el número de autoridades vacadas y el número de afiliaciones. Asimismo, el modelo explica el 63.11% de la variabilidad del número de autoridades electas.
+
+
+```{r}
+library(jtools)
+plot_coefs(modelo1,modelo2,scale=FALSE)
+```
+
+##### Las líneas que se ven en el gráfico son los intervalos de confianza al 95% para los coeficientes. El modelo 1 tiene una sola variable independiente (procesos electorales enfrentados) que tiene un efecto positivo y significativo en el número de autoridades electas de un movimiento regional. El coeficiente es de 45.077, lo que significa que por cada proceso electoral enfrentado, el número de autoridades electas aumenta en 45.077 unidades en promedio.
+
+##### El modelo 2 tiene cuatro variables independientes (procesos electorales enfrentados, autoridades vigentes, autoridades vacadas y afiliaciones) que tienen efectos positivos y significativos en el número de autoridades electas de un movimiento regional. Los coeficientes son de 31.850, 56.191, 13.633 y 0.019 respectivamente, lo que significa que por cada unidad que aumentan estas variables, el número de autoridades electas aumenta en esas cantidades en promedio.
+
+##### El modelo 2 tiene un mayor R cuadrado ajustado que el modelo 1 (0.631 vs 0.577), lo que indica que explica mejor la variabilidad del número de autoridades electas que el modelo 1.
+
+##### El modelo 2 también tiene intervalos de confianza más estrechos que el modelo 1 para los coeficientes, lo que indica que las estimaciones son más precisas y confiables.
+
+### *CONCLUSIÓN PRESENTACIÓN 3 Y FINAL*
+##### Nuestra variable dependiente es "autoridades electas". Ambos modelos demuestran que las variables independientes tienen efectos significativos, por lo que se concluye que todas las variables independientes tienen un impacto estadísticamente significativo en el número de autoridades electas. Además que en el modelo 1 podemos notar que el R2 ajustado explica el 58% de la variabilidad de autoridades electas. Por otro lado, el modelo 2 demuestra mayor porcentaje de explicación de la variabilidad de las autoridades electas. Por ello, nuestros modelos tienen alto porcentaje de predicción de éxito electoral. Estos modelos de prediccion pueden servir para anticipar resultados electorales, podemos predecir el numero de autoridades electas y predecir tendencias políticas del éxito de un movimiento regional.
