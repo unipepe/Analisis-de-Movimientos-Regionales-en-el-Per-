@@ -1,5 +1,16 @@
 # Analisis-de-Movimientos-Regionales-en-el-Peru
+# Resumen
+El presente trabajo consiste en un extenso y riguroso análisis estadístico enfocado en evaluar los factores determinantes del éxito electoral de los movimientos regionales políticos en el Perú. Para lograr este objetivo, los autores emplearon una completa base de datos compuesta por 187 movimientos regionales debidamente inscritos ante el Jurado Nacional de Elecciones. 
 
+Mediante el uso de potentes técnicas descriptivas e inferenciales, se estudió a profundidad un conjunto de variables fundamentales como los años de existencia de cada movimiento, su número de comités, las autoridades electas que han logrado obtener, los procesos electorales a los que se han enfrentado, sus alianzas políticas, entre otros factores de relevancia.
+
+De forma particular, se puso especial énfasis en analizar la variable "autoridades electas" como medida cardinal del éxito electoral alcanzado históricamente por cada movimiento regional. Así, se hallaron interesantes correlaciones positivas entre esta variable dependiente y predictores clave como la antigüedad del movimiento y la cantidad de procesos electorales previamente enfrentados.
+
+Capitalizando estos hallazgos, los autores desarrollaron robustos modelos de regresión lineal capaces de predecir el número de autoridades que pueden llegar a ser electas por un movimiento regional en base a sus características organizativas y trayectoria política. Los resultados indican que estos modelos logran explicar entre un 58% y 63% de la variabilidad en la variable dependiente, lo cual resalta su preciso poder predictivo.
+
+En conclusión, este completo estudio estadístico permite determinar qué factores influyen fuertemente en el éxito electoral de los movimientos regionales en el Perú, proporcionando interesantes modelos que pueden anticipar su desempeño futuro en base al análisis de su experiencia previa y atributos como organización.
+
+# Introducción
 Los movimientos regionales son organizaciones políticas que buscan representar los intereses de una región específica y que participan en las elecciones municipales, provinciales y regionales en el Perú. Estos movimientos han cobrado relevancia en los últimos años, al ganar la mayoría de los gobiernos regionales en las elecciones subnacionales. Sin embargo, poco se sabe sobre los factores que influyen en el éxito electoral de los movimientos regionales y cómo estos se relacionan con el sistema político nacional. En este trabajo, se analiza una base de datos de 187 movimientos regionales inscritos ante el Jurado Nacional de Elecciones (JNE) y se estudia la relación entre el número de autoridades electas históricamente por cada movimiento y otras variables como los años de existencia, los procesos electorales enfrentados y las autoridades vigentes del periodo 2023-2026. Se emplean técnicas descriptivas e inferenciales como gráficos, tablas, pruebas t y correlaciones para explorar y contrastar hipótesis sobre el desempeño electoral de los movimientos regionales en el Perú.
 
 # Puntos clave
