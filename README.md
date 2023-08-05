@@ -1,6 +1,6 @@
 # Analisis-de-Movimientos-Regionales-en-el-Peru
 # Resumen
-El presente trabajo consiste en un riguroso análisis estadístico enfocado en evaluar los factores determinantes del éxito electoral de los movimientos regionales políticos en el Perú. Para lograr este objetivo, los autores emplearon una completa base de datos compuesta por 187 movimientos regionales debidamente inscritos ante el Jurado Nacional de Elecciones. 
+El presente trabajo consiste en un riguroso análisis estadístico enfocado en evaluar los factores determinantes del éxito electoral de los movimientos regionales políticos en el Perú. Para lograr este objetivo, los autores elaboraron una completa base de datos compuesta por 187 movimientos regionales debidamente inscritos ante el Jurado Nacional de Elecciones. 
 
 Mediante el uso de técnicas descriptivas e inferenciales, se estudió a profundidad un conjunto de variables fundamentales como los años de existencia de cada movimiento, su número de comités, las autoridades electas que han logrado obtener, los procesos electorales a los que se han enfrentado, sus alianzas políticas, entre otros factores de relevancia.
 
